@@ -1,0 +1,9 @@
+tensorflow
+tensorflow-datasets
+matplotlib
+numpy
+scikit-learn
+tf2onnx
+onnx
+onnxruntime
+opencv-python
