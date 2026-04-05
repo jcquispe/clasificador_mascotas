@@ -1,85 +1,72 @@
 package com.juancarlosqh.mascotas
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.graphics.ImageDecoder
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-
-class ClassifierScreen : ComponentActivity() {
-
-    private lateinit var classifier: ONNXClassifier
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        classifier = ONNXClassifier(this)
-        val bitmap = assets.open("pet3.jpeg").use { BitmapFactory.decodeStream(it) }
-        val predictions = classifier.predict(bitmap, topK = 1)
-
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    ClassifierScreenContent(bitmap, predictions)
-                }
-            }
-        }
-    }
-}
 
 @Composable
-fun ClassifierScreenContent(bitmap: Bitmap, predictions: List<Pair<String, Float>>) {
-    val scrollState = rememberScrollState()
+fun ClassifierScreen(viewModel: MainViewModel) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Predicciones del modelo",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+    val context = LocalContext.current
+    val result by viewModel.result.collectAsState()
+
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+
+        uri?.let {
+            val source = ImageDecoder.createSource(context.contentResolver, it)
+            val bmp = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.isMutableRequired = true
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            }
+
+            bitmap = bmp
+            viewModel.classify(bmp)
+        }
+    }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Button(onClick = {
+            launcher.launch("image/*")
+        }) {
+            Text("Seleccionar imagen")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentDescription = "Imagen de prueba",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Resultado:",
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        predictions.forEach { (name, prob) ->
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 4.dp)
+        bitmap?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.size(300.dp)
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Predicción: $result")
     }
 }
