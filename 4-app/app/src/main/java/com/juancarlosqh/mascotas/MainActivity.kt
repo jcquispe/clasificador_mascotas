@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import com.juancarlosqh.mascotas.ui.theme.MascotasTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -16,7 +17,9 @@ class MainActivity : ComponentActivity() {
         ClassesLoader.load(this)
 
         setContent {
-            ClassifierScreen(viewModel)
+            MascotasTheme {
+                ClassifierScreen(viewModel)
+            }
         }
     }
 }
