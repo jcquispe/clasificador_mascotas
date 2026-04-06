@@ -46,7 +46,7 @@ El entrenamiento se ajustó para obtener un accuracy superior al 99% en 30 epoca
 ![Loss y Accuracy](training_plot.png)
 
 Adicionalemnte tambien genera la matrix de confusión
-![Alt text for the image](confusion_matrix.png)
+![Matriz de confusion](confusion_matrix.png)
 
 ## 2. Convertir el modelo
 
@@ -74,5 +74,16 @@ El proyecto de Android esta desarrollado con Kotlin y Jetpack Compose, para ejec
 * Copiar el modelo generado `best_model_efficientnet_b3.onnx` en la ruta `app/src/main/assets`.
 * El archivo JSON con las razas de las mascotas deben ubicarse en la ruta `app/src/main/assets`.
 
-## Nota
-* Inicialmente la aplicacion carga una imagen por defecto y hace la predicción de la misma, el siguiente paso será realizar la carga dinámica y mejorar la interfaz. 
+## 5. Predicción desde galeria y con cámara del dispositivo
+
+Se implementó una pantalla inicial desde la cual se puede realizar 2 tipos de predicción:
+
+![Pantalla inicial](pantalla_inicio.jpg)
+
+* Predicción desde la galería de fotos
+
+![Prediccion desde galeria](pantalla_galeria.jpg)
+
+* Predicción en tiempo real haciendo uso de la cámara del dispositivo
+
+![Prediccion desde camara](pantalla_camara.jpg)
